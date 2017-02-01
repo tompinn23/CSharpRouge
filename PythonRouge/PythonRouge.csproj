@@ -36,15 +36,6 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IronPython">
-      <HintPath>.\IronPython.dll</HintPath>
-    </Reference>
-    <Reference Include="IronPython.Modules">
-      <HintPath>.\IronPython.Modules.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.Scripting">
-      <HintPath>.\Microsoft.Scripting.dll</HintPath>
-    </Reference>
     <Reference Include="OpenTK">
       <HintPath>.\OpenTK.dll</HintPath>
     </Reference>
