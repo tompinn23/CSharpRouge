@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{51DABCC5-1E8C-4209-A56C-60E6BC9D10E0}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PythonRouge</RootNamespace>
     <AssemblyName>PythonRouge</AssemblyName>
@@ -32,12 +32,27 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
   <ItemGroup>
+    <Reference Include="IronPython">
+      <HintPath>.\IronPython.dll</HintPath>
+    </Reference>
+    <Reference Include="IronPython.Modules">
+      <HintPath>.\IronPython.Modules.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Scripting">
+      <HintPath>.\Microsoft.Scripting.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK">
       <HintPath>.\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="RLNET">
       <HintPath>.\RLNET.dll</HintPath>
+    </Reference>
+    <Reference Include="RogueSharp">
+      <HintPath>.\RogueSharp.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -51,6 +66,7 @@
   <ItemGroup>
     <Compile Include="game\constants.cs" />
     <Compile Include="game\Entity.cs" />
+    <Compile Include="game\mapGenerator.cs" />
     <Compile Include="game\Player.cs" />
     <Compile Include="game\SPEngine.cs" />
     <Compile Include="Program.cs" />
