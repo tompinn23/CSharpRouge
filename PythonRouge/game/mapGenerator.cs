@@ -17,8 +17,8 @@ namespace PythonRouge.game
             {
                 for (int x = 0; x < cellsX; x++)
                 {
-                    Cell c = new Cell(x, y, cells.Count);
-                    cells.Add(new Tuple<int, int>(c.x, c.y), c);
+                    Cell cd = new Cell(x, y, cells.Count);
+                    cells.Add(new Tuple<int, int>(cd.x, cd.y), cd);
                 }
                 celllist = cells.Keys.ToList();
                 Cell current = cells[celllist[rnd.Next(celllist.Count)]];
@@ -160,9 +160,9 @@ namespace PythonRouge.game
             }
             return neighbourCells;
         }
-        List <Tuple<int, int>> _AStar(Tuple<int, int>, Tuple<int, int>)
+        List <Tuple<int, int>> _AStar(Tuple<int, int> start, Tuple<int, int> goal)
         {
-
+            return new List<Tuple<int, int>>();
         }
 
     }
