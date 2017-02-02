@@ -26,7 +26,7 @@ namespace PythonRouge.game
             invConsole.SetBackColor(0, 0, 20, 70, RLColor.Cyan);
         }
 
-        public void blit()
+        public void render()
         {
             startUpdate();
             RLConsole.Blit(mapConsole, 0, 0, 70, 50, this.rootConsole, 0, 10);

@@ -61,8 +61,7 @@ namespace PythonRouge
         static void rootConsole_Render(object sender, UpdateEventArgs e)
         {
             rootConsole.Clear();
-
-            spEngine.blit();
+            spEngine.render();
             rootConsole.Draw();
         }
     }
