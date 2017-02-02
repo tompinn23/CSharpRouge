@@ -17,6 +17,7 @@ namespace PythonRouge.game
         private RLConsole invConsole = new RLConsole(20, 70);
 
         private Player player = new Player(0,0,100,"Tom", '@');
+        private Dictionary<Tuple<int, int>, string> tiles;
 
 
         public SPEngine(RLRootConsole rootConsole)
@@ -24,6 +25,7 @@ namespace PythonRouge.game
             this.rootConsole = rootConsole;
             mapConsole.SetBackColor(0, 0, 70, 50, RLColor.Blue);
             invConsole.SetBackColor(0, 0, 20, 70, RLColor.Cyan);
+            mapGenerate();
         }
 
         public void render()
@@ -36,11 +38,22 @@ namespace PythonRouge.game
 
         public void mapGenerate()
         {
+            mapGenerator mapGen = new mapGenerator();
+            tiles = mapGen.generate(7, 5, 10);
+        }
+        public void renderMap()
+        {
+            foreach(KeyValuePair<Tuple<int, int>, string> kvp in tiles)
+            {
+                char[] character = kvp.Value.ToCharArray();
+                mapConsole.SetChar(kvp.Key.Item1, kvp.Key.Item2, character[0]);
+            }
         }
 
 
         public void startUpdate()
         {
+            //renderMap();
             player.draw(mapConsole);                     
         }
         public void endUpdate()
