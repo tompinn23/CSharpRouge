@@ -38,8 +38,6 @@ namespace PythonRouge.game
 
         public void mapGenerate()
         {
-            mapGenerator mapGen = new mapGenerator();
-            tiles = mapGen.generate(7, 5, 10);
         }
         public void renderMap()
         {

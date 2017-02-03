@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="game\generator.cs" />
     <Compile Include="game\constants.cs" />
     <Compile Include="game\Entity.cs" />
     <Compile Include="game\mapGenerator.cs" />

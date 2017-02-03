@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using OpenTK;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -127,6 +128,10 @@ namespace PythonRouge.game
                     connections[new Tuple<int, int>(ids[0], ids[1])] = new Tuple<List<Tuple<int, int>>, List<Tuple<int, int>>>(cell.room, other.room);
                 }
             }
+            int tilesX = cellsX * cellSize;
+            int tilesY = cellsY * cellSize;
+            List<List<Node>> grid = ConstructGrid(tilesX, tilesY);
+            Astar A = new Astar(grid);
             foreach (Tuple<List<Tuple<int, int>>, List<Tuple<int, int>>> bcc in connections.Values)
             {
                 var start = bcc.Item1[rnd.Next(bcc.Item1.Count)];
@@ -134,9 +139,9 @@ namespace PythonRouge.game
                 var ab = bcc.Item1;
                 var bb = bcc.Item2;
                 List<Tuple<int, int>> corridor = new List<Tuple<int, int>>();
-
-                foreach (Tuple<int, int> tile in _AStar(start, end))
+                foreach (Node node in A.FindPath(new Vector2(start.Item1, start.Item2),new Vector2(end.Item1, end.Item2)))
                 {
+                    Tuple<int, int> tile = new Tuple<int, int>((int)node.Position.X, (int)node.Position.Y);
                     if (!ab.Contains(tile) && !bb.Contains(tile))
                     {
                         corridor.Add(tile);
@@ -149,8 +154,7 @@ namespace PythonRouge.game
             var stairsDown = lastCell.room[rnd.Next(lastCell.room.Count)];
 
             Dictionary<Tuple<int, int>, string> tiles = new Dictionary<Tuple<int, int>, string>();
-            int tilesX = cellsX * cellSize;
-            int tilesY = cellsY * cellSize;
+            
             for(int x = 0;x < tilesX; x++)
             {
                 for (int y = 0; y < tilesY; y++)
@@ -165,16 +169,29 @@ namespace PythonRouge.game
                     tiles[xy] = ".";
                 }
             }
-            foreach(KeyValuePair<Tuple<int, int>, string> kvp in tiles)
+            for (int x = 0; x < tilesX; x++)
             {
-                if(kvp.Value != "." && getNeighbourTiles(kvp.Key, tiles).Contains("."))
+                for (int y = 0; y < tilesY; y++)
                 {
-                    tiles[kvp.Key] = "#";
+                    Tuple<int, int> key = new Tuple<int, int>(x, y);
+                    if(tiles[key] != "." && getNeighbourTiles(key, tiles).Contains("."))
+                {
+                        tiles[key] = "#";
+                    }
                 }
             }
             tiles[stairsUp] = "<";
             tiles[stairsDown] = ">";
             Console.WriteLine("Done");
+            for(int y = 0;y < tilesY; y++)
+            {
+                for(int x = 0;x < tilesX; x++)
+                {
+                    Console.Write(tiles[new Tuple<int, int>(x, y)]);
+                }
+                Console.Write("\n");
+            }
+                
             return tiles;
         }
 
@@ -191,7 +208,15 @@ namespace PythonRouge.game
             {
                 var x = offset.Item1;
                 var y = offset.Item2;
-                neighbourTiles.Add(tiles[new Tuple<int, int>(tx + x, ty + y)]);
+                try
+                {
+                    neighbourTiles.Add(tiles[new Tuple<int, int>(tx + x, ty + y)]);
+                }
+                catch(KeyNotFoundException e)
+                {
+                    continue;
+                }
+                
             }
             return neighbourTiles;
         }
@@ -214,81 +239,167 @@ namespace PythonRouge.game
             return neighbourCells;
         }
 
-
-        private List <Tuple<int, int>> _AStar(Tuple<int, int> start, Tuple<int, int> goal)
+        public class Node
         {
-            List<Tuple<int, int>> closed = new List<Tuple<int, int>>();
-            List<Tuple<int, int>> open = new List<Tuple<int, int>>();
-            open.Add(start);
-            Dictionary<Tuple<int, int>, Tuple<int, int>> cameFrom = new Dictionary<Tuple<int, int>, Tuple<int, int>>();
-            Dictionary<Tuple<int, int>, int> gScore = new Dictionary<Tuple<int, int>, int>();
-            gScore.Add(start, 0);
-            Dictionary<Tuple<int, int>, int> fScore = new Dictionary<Tuple<int, int>, int>();
-            fScore.Add(start, heuristic(start, goal));
-            Tuple<int, int> current = null;
-            while (open.Count > 0)
+            // Change this depending on what the desired size is for each element in the grid
+            public static int NODE_SIZE = 1;
+            public Node Parent;
+            public Vector2 Position;
+            public Vector2 Center
             {
-                current = null;
-                foreach(Tuple<int, int> i in open)
+                get
                 {
-                   if (current == null || fScore[i] < fScore[current] )
-                    {
-                        current = i;
-                    }
-
+                    return new Vector2(Position.X + NODE_SIZE / 2, Position.Y + NODE_SIZE / 2);
                 }
-                if(current == goal)
+            }
+            public float DistanceToTarget;
+            public float Cost;
+            public float F
+            {
+                get
                 {
-                    return reconstructPath(goal, start, cameFrom);
+                    if (DistanceToTarget != -1 && Cost != -1)
+                        return DistanceToTarget + Cost;
+                    else
+                        return -1;
                 }
-                open.Remove(current);
-                closed.Add(current);
+            }
+            public bool Walkable;
 
-                foreach(Tuple<int, int> neighbor in neighbours(current))
+            public Node(Vector2 pos, bool walkable)
+            {
+                Parent = null;
+                Position = pos;
+                DistanceToTarget = -1;
+                Cost = 1;
+                Walkable = walkable;
+            }
+        }
+
+        private List<List<Node>> ConstructGrid(int width, int height)
+        {
+            List<List<Node>> temp = new List<List<Node>>();
+            bool walkable = true;
+            float tempX = 0;
+            float tempY = 0;
+
+            for (int i = 0; i < width; i++)
+            {
+                temp.Add(new List<Node>());
+                for (int j = 0; j < height; j++)
                 {
-                    if(closed.Contains(neighbor))
-                    {
-                        continue;
-                    }
-                    var g = gScore[current] + 1;
+                    temp[i].Add(new Node(new Vector2(i, j), walkable));
+                    tempX += 32;
+                }
+                tempX = 0;
+                tempY += 32;
+            }
+            return temp;
+        }
 
-                    if(!open.Contains(neighbor) || g < gScore[neighbor] )
+        public class Astar
+        {
+            List<List<Node>> Grid;
+            int GridRows
+            {
+                get
+                {
+                    return Grid[0].Count;
+                }
+            }
+            int GridCols
+            {
+                get
+                {
+                    return Grid.Count;
+                }
+            }
+
+            public Astar(List<List<Node>> grid)
+            {
+                Grid = grid;
+            }
+
+            public Stack<Node> FindPath(Vector2 Start, Vector2 End)
+            {
+                Node start = new Node(new Vector2((int)(Start.X / Node.NODE_SIZE), (int)(Start.Y / Node.NODE_SIZE)), true);
+                Node end = new Node(new Vector2((int)(End.X / Node.NODE_SIZE), (int)(End.Y / Node.NODE_SIZE)), true);
+
+                Stack<Node> Path = new Stack<Node>();
+                List<Node> OpenList = new List<Node>();
+                List<Node> ClosedList = new List<Node>();
+                List<Node> adjacencies;
+                Node current = start;
+
+                // add start node to Open List
+                OpenList.Add(start);
+
+                while (OpenList.Count != 0 && !ClosedList.Exists(x => x.Position == end.Position))
+                {
+                    current = OpenList[0];
+                    OpenList.Remove(current);
+                    ClosedList.Add(current);
+                    adjacencies = GetAdjacentNodes(current);
+
+
+                    foreach (Node n in adjacencies)
                     {
-                        cameFrom[neighbor] = current;
-                        gScore[neighbor] = g;
-                        fScore[neighbor] = gScore[neighbor] + heuristic(neighbor, goal);
-                        if(!open.Contains(neighbor))
+                        if (!ClosedList.Contains(n) && n.Walkable)
                         {
-                            open.Add(neighbor);
+                            if (!OpenList.Contains(n))
+                            {
+                                n.Parent = current;
+                                n.DistanceToTarget = Math.Abs(n.Position.X - end.Position.X) + Math.Abs(n.Position.Y - end.Position.Y);
+                                n.Cost = 1 + n.Parent.Cost;
+                                OpenList.Add(n);
+                                OpenList = OpenList.OrderBy(node => node.F).ToList<Node>();
+                            }
                         }
                     }
                 }
-            }
-            return new List<Tuple<int, int>>();
-        }
 
-        private int heuristic(Tuple<int, int> a, Tuple<int, int> b)
-        {
-            int ax = a.Item1;
-            int ay = a.Item2;
-            int bx = b.Item1;
-            int by1 = b.Item2;
-            return Math.Abs(ax - bx) + Math.Abs(ay - by1);
-        }
-        dynamic reconstructPath(Tuple<int, int> n, Tuple<int, int> start, Dictionary<Tuple<int, int>, Tuple<int, int>> cameFrom)
-        {
-            if(n == start)
+                // construct path, if end was not closed return null
+                if (!ClosedList.Exists(x => x.Position == end.Position))
+                {
+                    return null;
+                }
+
+                // if all good, return path
+                Node temp = ClosedList[ClosedList.IndexOf(current)];
+                while (temp.Parent != start && temp != null)
+                {
+                    Path.Push(temp);
+                    temp = temp.Parent;
+                }
+                return Path;
+            }
+
+            private List<Node> GetAdjacentNodes(Node n)
             {
-                return new List<Tuple<int, int>> { n };
-            }
-            return reconstructPath(cameFrom[n], start, cameFrom).Add(n);
-        }
+                List<Node> temp = new List<Node>();
 
-        List<Tuple<int, int>> neighbours(Tuple<int, int> n)
-        {
-            int x = n.Item1;
-            int y = n.Item2;
-            return new List<Tuple<int, int>> { new Tuple<int, int>(x - 1, y), new Tuple<int, int>(x + 1, y), new Tuple<int, int>(x, y - 1), new Tuple<int, int>(x, y + 1) };
+                int row = (int)n.Position.Y;
+                int col = (int)n.Position.X;
+
+                if (row + 1 < GridRows)
+                {
+                    temp.Add(Grid[col][row + 1]);
+                }
+                if (row - 1 >= 0)
+                {
+                    temp.Add(Grid[col][row - 1]);
+                }
+                if (col - 1 >= 0)
+                {
+                    temp.Add(Grid[col - 1][row]);
+                }
+                if (col + 1 < GridCols)
+                {
+                    temp.Add(Grid[col + 1][row]);
+                }
+
+                return temp;
+            }
         }
 
     }
