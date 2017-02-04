@@ -1,30 +1,38 @@
 ﻿using System;
-using System.Collections.Generic;
+using Lidgren.Network;
 using RLNET;
+using PythonRouge.game;
+using System.Collections.Generic;
 
-namespace PythonRouge.game
+namespace PythonRouge.network
 {
-    class SPEngine
+    internal class MPEngine
     {
-        private RLRootConsole rootConsole;
+        internal NetClient client;
 
-        private RLConsole mapConsole = new RLConsole(70, 50);
-        private RLConsole invConsole = new RLConsole(20, 70);
+        internal RLRootConsole rootConsole;
 
-        private Player player = new Player(0,0,100,'@', "Tom");
-        private Map map = new Map(70, 50);
+        internal RLConsole mapConsole = new RLConsole(70, 50);
+        internal RLConsole invConsole = new RLConsole(20, 70);
 
-        public SPEngine(RLRootConsole rootConsole)
+        internal Player player = new Player(0, 0, 100, '@', "Tom");
+        internal Map map = new Map(70, 50);
+
+        internal MPEngine(RLRootConsole rootConsole)
         {
+            var config = new NetPeerConfiguration("PythonRouge");
+            config.Port = 32078;
+            config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+            client = new NetClient(config);
+
             this.rootConsole = rootConsole;
             mapConsole.SetBackColor(0, 0, 70, 50, RLColor.Blue);
             invConsole.SetBackColor(0, 0, 20, 70, RLColor.Cyan);
-            mapGenerate();
             var pos = map.findPPos();
             player.pos = pos;
         }
 
-        public void render()
+        internal void render()
         {
             startUpdate();
             RLConsole.Blit(mapConsole, 0, 0, 70, 50, this.rootConsole, 0, 10);
@@ -32,29 +40,24 @@ namespace PythonRouge.game
             endUpdate();
         }
 
-        public void mapGenerate()
-        {
-            map.generate();
-        }
-
-        public void renderMap()
+        internal void renderMap()
         {
             var game_map = map.grid.Game_map;
-            foreach(KeyValuePair<Tuple<int, int>, Tile> kvp in game_map)
+            foreach (KeyValuePair<Tuple<int, int>, Tile> kvp in game_map)
             {
                 Tuple<int, int> pos = kvp.Key;
                 Tile tile = kvp.Value;
                 switch (tile.type)
                 {
                     case TileType.Floor:
-                        if(tile.lit)
+                        if (tile.lit)
                         {
                             mapConsole.Set(pos.Item1, pos.Item2, Colours.floor_lit, Colours.floor_lit, tile.symbol);
                         }
                         else
                         {
                             mapConsole.Set(pos.Item1, pos.Item2, Colours.floor, Colours.floor, tile.symbol);
-                        }                        
+                        }
                         break;
                     case TileType.Wall:
                         if (tile.lit)
@@ -76,28 +79,29 @@ namespace PythonRouge.game
         }
 
 
-        public void startUpdate()
+        internal void startUpdate()
         {
+            w
             renderMap();
-            player.draw(mapConsole);                     
+            player.draw(mapConsole);
         }
-        public void endUpdate()
+        internal void endUpdate()
         {
             player.clear(mapConsole);
         }
-        
 
-        public void handleKey(RLKeyPress keyPress)
+
+        internal void handleKey(RLKeyPress keyPress)
         {
             if (keyPress.Key == RLKey.Up)
             {
-                if(map.canMove(player.pos, 0, -1))
+                if (map.canMove(player.pos, 0, -1))
                 {
                     map.resetLight();
                     player.move(0, -1);
                     Vector2 pos = new Vector2(player.pos.x, player.pos.y);
                     ShadowCast.ComputeVisibility(map.grid, pos, 7.5f);
-                } 
+                }
             }
             else if (keyPress.Key == RLKey.Down)
             {

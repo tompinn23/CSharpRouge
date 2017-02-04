@@ -1,14 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{51DABCC5-1E8C-4209-A56C-60E6BC9D10E0}</ProjectGuid>
+    <ProjectGuid>{258759C5-FFAB-43B0-9B27-49EDBCABB954}</ProjectGuid>
     <OutputType>Exe</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>PythonRouge</RootNamespace>
-    <AssemblyName>PythonRouge</AssemblyName>
+    <RootNamespace>PythonRouge.Server</RootNamespace>
+    <AssemblyName>PythonRouge.Server</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -36,23 +35,11 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>PythonRouge.Program</StartupObject>
+    <StartupObject>PythonRouge.Server.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Karcero">
-      <HintPath>..\..\..\..\..\Desktop\karcero\Karcero.Engine\bin\Debug\Karcero.dll</HintPath>
-    </Reference>
     <Reference Include="Lidgren.Network">
-      <HintPath>.\Lidgren.Network.dll</HintPath>
-    </Reference>
-    <Reference Include="OpenTK">
-      <HintPath>.\OpenTK.dll</HintPath>
-    </Reference>
-    <Reference Include="RLNET">
-      <HintPath>.\RLNET.dll</HintPath>
-    </Reference>
-    <Reference Include="RogueSharp">
-      <HintPath>.\RogueSharp.dll</HintPath>
+      <HintPath>..\PythonRouge\Lidgren.Network.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -64,27 +51,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="game\Colours.cs" />
-    <Compile Include="game\constants.cs" />
-    <Compile Include="game\Entity.cs" />
-    <Compile Include="game\FOV.cs" />
-    <Compile Include="game\Map.cs" />
-    <Compile Include="game\Player.cs" />
-    <Compile Include="game\SPEngine.cs" />
-    <Compile Include="network\MPEngine.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\PythonRouge\PythonRouge.csproj">
+      <Project>{51dabcc5-1e8c-4209-a56c-60e6bc9d10e0}</Project>
+      <Name>PythonRouge</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
 </Project>

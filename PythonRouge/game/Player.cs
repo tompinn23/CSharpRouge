@@ -7,18 +7,17 @@ using RLNET;
 
 namespace PythonRouge.game
 {
-    class Player
+    [Serializable]
+    public class Player 
     {
-        private int xPos;
-        private int yPos;
+        public EntityPos pos;
         private int health;
         public char character;
         public string name;
 
-        public Player(int x, int y, int health, string name, char character)
+        public Player(int x, int y, int health, char character, string name)
         {
-            this.xPos = x;
-            this.yPos = y;
+            this.pos = new EntityPos(x, y);
             this.health = health;
             this.name = name;
             this.character = character;
@@ -29,18 +28,18 @@ namespace PythonRouge.game
         //Move method updates player pos in change of y and x
         public void move(int dx, int dy)
         {
-            this.xPos += dx;
-            this.yPos += dy;
+            this.pos.x += dx;
+            this.pos.y += dy;
         }
 
         public void draw(RLConsole console)
         {
-            console.Set(this.xPos, this.yPos, RLColor.White, null, this.character);
+            console.Set(this.pos.x, this.pos.y, RLColor.White, null, this.character);
         }
 
         public void clear(RLConsole console)
         {
-            console.Set(this.xPos, this.yPos, null, null, ' ');
+            console.Set(this.pos.x, this.pos.y, null, null, ' ');
         }
 
     }
