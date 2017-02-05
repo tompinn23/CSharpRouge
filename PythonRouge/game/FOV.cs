@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PythonRouge.game
 {
@@ -20,7 +16,7 @@ namespace PythonRouge.game
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */    /*
+ */ /*
     Field-of-vision calculation for a simple tiled map.
 
     Based on http://www.roguebasin.com/index.php?title=FOV_using_recursive_shadowcasting , but
@@ -49,45 +45,20 @@ namespace PythonRouge.game
 
     public static class ShadowCast
     {
-        /// <summary>
-        /// Immutable class for holding coordinate transform constants.  Bulkier than a 2D
-        /// array of ints, but it's self-formatting if you want to log it while debugging.
-        /// </summary>
-        private class OctantTransform
+        private static readonly OctantTransform[] s_octantTransform =
         {
-            public int xx { get; private set; }
-            public int xy { get; private set; }
-            public int yx { get; private set; }
-            public int yy { get; private set; }
-
-            public OctantTransform(int xx, int xy, int yx, int yy)
-            {
-                this.xx = xx;
-                this.xy = xy;
-                this.yx = yx;
-                this.yy = yy;
-            }
-
-            public override string ToString()
-            {
-                // consider formatting in constructor to reduce garbage
-                return string.Format("[OctantTransform {0,2:D} {1,2:D} {2,2:D} {3,2:D}]",
-                    xx, xy, yx, yy);
-            }
-        }
-        private static OctantTransform[] s_octantTransform = {
-        new OctantTransform( 1,  0,  0,  1 ),   // 0 E-NE
-        new OctantTransform( 0,  1,  1,  0 ),   // 1 NE-N
-        new OctantTransform( 0, -1,  1,  0 ),   // 2 N-NW
-        new OctantTransform(-1,  0,  0,  1 ),   // 3 NW-W
-        new OctantTransform(-1,  0,  0, -1 ),   // 4 W-SW
-        new OctantTransform( 0, -1, -1,  0 ),   // 5 SW-S
-        new OctantTransform( 0,  1, -1,  0 ),   // 6 S-SE
-        new OctantTransform( 1,  0,  0, -1 ),   // 7 SE-E
-    };
+            new OctantTransform(1, 0, 0, 1), // 0 E-NE
+            new OctantTransform(0, 1, 1, 0), // 1 NE-N
+            new OctantTransform(0, -1, 1, 0), // 2 N-NW
+            new OctantTransform(-1, 0, 0, 1), // 3 NW-W
+            new OctantTransform(-1, 0, 0, -1), // 4 W-SW
+            new OctantTransform(0, -1, -1, 0), // 5 SW-S
+            new OctantTransform(0, 1, -1, 0), // 6 S-SE
+            new OctantTransform(1, 0, 0, -1) // 7 SE-E
+        };
 
         /// <summary>
-        /// Lights up cells visible from the current position.  Clear all lighting before calling.
+        ///     Lights up cells visible from the current position.  Clear all lighting before calling.
         /// </summary>
         /// <param name="grid">The cell grid definition.</param>
         /// <param name="gridPosn">The player's position within the grid.</param>
@@ -110,39 +81,40 @@ namespace PythonRouge.game
             // NOTE: depending on the compiler, it's possible that passing the octant transform
             // values as four integers rather than an object reference would speed things up.
             // It's much tidier this way though.
-            for (int txidx = 0; txidx < s_octantTransform.Length; txidx++)
-            {
+            for (var txidx = 0; txidx < s_octantTransform.Length; txidx++)
                 CastLight(grid, gridPosn, viewRadius, 1, 1.0f, 0.0f, s_octantTransform[txidx]);
-            }
         }
 
 
         /// <summary>
-        /// Recursively casts light into cells.  Operates on a single octant.
+        ///     Recursively casts light into cells.  Operates on a single octant.
         /// </summary>
         /// <param name="grid">The cell grid definition.</param>
         /// <param name="gridPosn">The player's position within the grid.</param>
         /// <param name="viewRadius">The view radius; can be a fractional value.</param>
         /// <param name="startColumn">Current column; pass 1 as initial value.</param>
-        /// <param name="leftViewSlope">Slope of the left (upper) view edge; pass 1.0 as
-        ///   the initial value.</param>
-        /// <param name="rightViewSlope">Slope of the right (lower) view edge; pass 0.0 as
-        ///   the initial value.</param>
+        /// <param name="leftViewSlope">
+        ///     Slope of the left (upper) view edge; pass 1.0 as
+        ///     the initial value.
+        /// </param>
+        /// <param name="rightViewSlope">
+        ///     Slope of the right (lower) view edge; pass 0.0 as
+        ///     the initial value.
+        /// </param>
         /// <param name="txfrm">Coordinate multipliers for the octant transform.</param>
-        ///
         /// Maximum recursion depth is (Ceiling(viewRadius)).
         private static void CastLight(GameGrid grid, Vector2 gridPosn, float viewRadius,
-                int startColumn, float leftViewSlope, float rightViewSlope, OctantTransform txfrm)
+            int startColumn, float leftViewSlope, float rightViewSlope, OctantTransform txfrm)
         {
             //Debug.Assert(leftViewSlope >= rightViewSlope);
 
             // Used for distance test.
-            float viewRadiusSq = viewRadius * viewRadius;
+            var viewRadiusSq = viewRadius * viewRadius;
 
-            int viewCeiling = (int)Math.Ceiling(viewRadius);
+            var viewCeiling = (int) Math.Ceiling(viewRadius);
 
             // Set true if the previous cell we encountered was blocked.
-            bool prevWasBlocked = false;
+            var prevWasBlocked = false;
 
             // As an optimization, when scanning past a block we keep track of the
             // rightmost corner (bottom-right) of the last one seen.  If the next cell
@@ -150,25 +122,25 @@ namespace PythonRouge.game
             // of the empty cell.
             float savedRightSlope = -1;
 
-            int xDim = grid.xDim;
-            int yDim = grid.yDim;
+            var xDim = grid.xDim;
+            var yDim = grid.yDim;
 
             // Outer loop: walk across each column, stopping when we reach the visibility limit.
-            for (int currentCol = startColumn; currentCol <= viewCeiling; currentCol++)
+            for (var currentCol = startColumn; currentCol <= viewCeiling; currentCol++)
             {
-                int xc = currentCol;
+                var xc = currentCol;
 
                 // Inner loop: walk down the current column.  We start at the top, where X==Y.
                 //
                 // TODO: we waste time walking across the entire column when the view area
                 //   is narrow.  Experiment with computing the possible range of cells from
                 //   the slopes, and iterate over that instead.
-                for (int yc = currentCol; yc >= 0; yc--)
+                for (var yc = currentCol; yc >= 0; yc--)
                 {
                     // Translate local coordinates to grid coordinates.  For the various octants
                     // we need to invert one or both values, or swap X for Y.
-                    int gridX = gridPosn.x + xc * txfrm.xx + yc * txfrm.xy;
-                    int gridY = gridPosn.y + xc * txfrm.yx + yc * txfrm.yy;
+                    var gridX = gridPosn.x + xc * txfrm.xx + yc * txfrm.xy;
+                    var gridY = gridPosn.y + xc * txfrm.yx + yc * txfrm.yy;
 
                     // Range-check the values.  This lets us avoid the slope division for blocks
                     // that are outside the grid.
@@ -177,9 +149,7 @@ namespace PythonRouge.game
                     // start at the top of the column, which may be outside the grid if we're (say)
                     // checking the first octant while positioned at the north edge of the map.
                     if (gridX < 0 || gridX >= xDim || gridY < 0 || gridY >= yDim)
-                    {
                         continue;
-                    }
 
                     // Compute slopes to corners of current block.  We use the top-left and
                     // bottom-right corners.  If we were iterating through a quadrant, rather than
@@ -187,8 +157,8 @@ namespace PythonRouge.game
                     //
                     // Note these values will be outside the view angles for the blocks at the
                     // ends -- left value > 1, right value < 0.
-                    float leftBlockSlope = (yc + 0.5f) / (xc - 0.5f);
-                    float rightBlockSlope = (yc - 0.5f) / (xc + 0.5f);
+                    var leftBlockSlope = (yc + 0.5f) / (xc - 0.5f);
+                    var rightBlockSlope = (yc - 0.5f) / (xc + 0.5f);
 
                     // Check to see if the block is outside our view area.  Note that we allow
                     // a "corner hit" to make the block visible.  Changing the tests to >= / <=
@@ -196,15 +166,9 @@ namespace PythonRouge.game
                     // swath to a single diagonal line), and affect how far you can see past a block
                     // as you approach it.  This is mostly a matter of personal preference.
                     if (rightBlockSlope > leftViewSlope)
-                    {
-                        // Block is above the left edge of our view area; skip.
                         continue;
-                    }
-                    else if (leftBlockSlope < rightViewSlope)
-                    {
-                        // Block is below the right edge of our view area; we're done.
+                    if (leftBlockSlope < rightViewSlope)
                         break;
-                    }
 
                     // This cell is visible, given infinite vision range.  If it's also within
                     // our finite vision range, light it up.
@@ -218,11 +182,9 @@ namespace PythonRouge.game
                     //  could reduce iteration at the corners.
                     float distanceSquared = xc * xc + yc * yc;
                     if (distanceSquared <= viewRadiusSq)
-                    {
                         grid.SetLight(gridX, gridY, distanceSquared);
-                    }
 
-                    bool curBlocked = grid.IsWall(gridX, gridY);
+                    var curBlocked = grid.IsWall(gridX, gridY);
 
                     if (prevWasBlocked)
                     {
@@ -251,10 +213,8 @@ namespace PythonRouge.game
                             // corner will be greater than the initial view slope (1.0).  Handle
                             // that here.
                             if (leftBlockSlope <= leftViewSlope)
-                            {
                                 CastLight(grid, gridPosn, viewRadius, currentCol + 1,
                                     leftViewSlope, leftBlockSlope, txfrm);
-                            }
 
                             // Once that's done, we keep searching to the right (down the column),
                             // looking for another opening.
@@ -269,9 +229,34 @@ namespace PythonRouge.game
                 // finding an open cell, then the area defined by our view area is completely
                 // obstructed, and we can stop working.
                 if (prevWasBlocked)
-                {
                     break;
-                }
+            }
+        }
+
+        /// <summary>
+        ///     Immutable class for holding coordinate transform constants.  Bulkier than a 2D
+        ///     array of ints, but it's self-formatting if you want to log it while debugging.
+        /// </summary>
+        private class OctantTransform
+        {
+            public OctantTransform(int xx, int xy, int yx, int yy)
+            {
+                this.xx = xx;
+                this.xy = xy;
+                this.yx = yx;
+                this.yy = yy;
+            }
+
+            public int xx { get; }
+            public int xy { get; }
+            public int yx { get; }
+            public int yy { get; }
+
+            public override string ToString()
+            {
+                // consider formatting in constructor to reduce garbage
+                return string.Format("[OctantTransform {0,2:D} {1,2:D} {2,2:D} {3,2:D}]",
+                    xx, xy, yx, yy);
             }
         }
     }
