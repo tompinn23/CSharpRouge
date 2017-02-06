@@ -84,16 +84,18 @@ namespace PythonRouge.Server
             switch (code)
             {
                 case 34:
-                    Stream stream = new MemoryStream();
-                    formatter.Serialize(stream, map.grid);
-                    stream.Position = 0;
-                    byte[] contents = stream.
-                    stream.Close();
-                    var outMsg = server.CreateMessage();
-                    outMsg.Write(45);
-                    outMsg.Write(contents);
-                    server.SendMessage(outMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
+                {
+                    //Stream stream = new MemoryStream();
+                    //formatter.Serialize(stream, map.grid);
+                    //stream.Position = 0;
+                    //byte[] contents = stream.
+                    //stream.Close();
+                    //var outMsg = server.CreateMessage();
+                    //outMsg.Write(45);
+                    //outMsg.Write(contents);
+                    //server.SendMessage(outMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
                     break;
+                }
             }
 
         }

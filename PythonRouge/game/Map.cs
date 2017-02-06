@@ -10,6 +10,7 @@
 // You should have received a copy of the GNU General Public License along with this program. If not, see
 // http://www.gnu.org/licenses/.
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using Karcero.Engine;
 using Karcero.Engine.Models;
@@ -148,7 +149,7 @@ namespace PythonRouge.game
             yDim = h;
         }
 
-        internal Dictionary<Tuple<int, int>, Tile> Game_map { get  => game_map; set  => game_map  = value; }
+        internal Dictionary<Tuple<int, int>, Tile> Game_map { get { return game_map; } set { game_map  = value; } }
 
         public bool IsWall(int x, int y)
         {

@@ -40,7 +40,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Karcero">
-      <HintPath>..\..\..\..\..\Desktop\karcero\Karcero.Engine\bin\Debug\Karcero.dll</HintPath>
+      <HintPath>.\Karcero.dll</HintPath>
     </Reference>
     <Reference Include="Lidgren.Network">
       <HintPath>.\Lidgren.Network.dll</HintPath>
