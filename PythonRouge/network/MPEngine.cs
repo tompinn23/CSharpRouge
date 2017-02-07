@@ -11,6 +11,7 @@
 // http://www.gnu.org/licenses/.
 
 using System;
+using System.Linq;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
@@ -25,7 +26,7 @@ namespace PythonRouge.network
     {
         internal NetClient Client;
         internal RLConsole InvConsole = new RLConsole(20, 70);
-        internal Map Map;
+        internal Map map;
 
         internal RLConsole MapConsole = new RLConsole(70, 50);
 
@@ -37,6 +38,13 @@ namespace PythonRouge.network
         internal bool InitFin = false;
         internal bool mapReady = false;
 
+        public static byte[] StringToByteArray(string hex) 
+        {
+            return Enumerable.Range(0, hex.Length)
+                     .Where(x => x % 2 == 0)
+                     .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
+                     .ToArray();
+        }
         internal MpEngine(RLRootConsole rootConsole)
         {
             var config = new NetPeerConfiguration("PythonRouge");
@@ -117,23 +125,18 @@ namespace PythonRouge.network
             switch (code)
             {
                 case 45:
-                    IFormatter formatter = new BinaryFormatter();
+
                     Stream stream = new MemoryStream();
-                    var sw = new StreamWriter(stream);
-                    sw.Write(msg.ReadString());
-                    sw.Flush();
-                    stream.Seek(0, SeekOrigin.Begin);
-                    var grid = (GameGrid) formatter.Deserialize(stream);
-                    stream.Close();
-                    Map = new Map(70 ,50, grid);
-                    mapReady = true;
+                    //msg.ReadAllFields(grid);
+                    //map = new Map(70, 50, grid);
+                    //mapReady = true;
                     break;
             }
         }
 
         internal void RenderMap()
         {
-            var game_map = Map.grid.Game_map;
+            var game_map = map.grid.Game_map;
             foreach (var kvp in game_map)
             {
                 var pos = kvp.Key;
@@ -181,38 +184,38 @@ namespace PythonRouge.network
             {
                 case RLKey.Up:
                     {
-                        if (!Map.canMove(Player.pos, 0, -1)) return;
-                        Map.resetLight();
+                        if (!map.canMove(Player.pos, 0, -1)) return;
+                        map.resetLight();
                         Player.move(0, -1);
                         var pos = new Vector2(Player.pos.x, Player.pos.y);
-                        ShadowCast.ComputeVisibility(Map.grid, pos, 7.5f);
+                        ShadowCast.ComputeVisibility(map.grid, pos, 7.5f);
                     }
                     break;
                 case RLKey.Down:
                     {
-                        if (!Map.canMove(Player.pos, 0, 1)) return;
-                        Map.resetLight();
+                        if (!map.canMove(Player.pos, 0, 1)) return;
+                        map.resetLight();
                         Player.move(0, 1);
                         var pos = new Vector2(Player.pos.x, Player.pos.y);
-                        ShadowCast.ComputeVisibility(Map.grid, pos, 7.5f);
+                        ShadowCast.ComputeVisibility(map.grid, pos, 7.5f);
                     }
                     break;
                 case RLKey.Left:
                     {
-                        if (!Map.canMove(Player.pos, -1, 0)) return;
-                        Map.resetLight();
+                        if (!map.canMove(Player.pos, -1, 0)) return;
+                        map.resetLight();
                         Player.move(-1, 0);
                         var pos = new Vector2(Player.pos.x, Player.pos.y);
-                        ShadowCast.ComputeVisibility(Map.grid, pos, 7.5f);
+                        ShadowCast.ComputeVisibility(map.grid, pos, 7.5f);
                     }
                     break;
                 case RLKey.Right:
                     {
-                        if (!Map.canMove(Player.pos, 1, 0)) return;
-                        Map.resetLight();
+                        if (!map.canMove(Player.pos, 1, 0)) return;
+                        map.resetLight();
                         Player.move(1, 0);
                         var pos = new Vector2(Player.pos.x, Player.pos.y);
-                        ShadowCast.ComputeVisibility(Map.grid, pos, 7.5f);
+                        ShadowCast.ComputeVisibility(map.grid, pos, 7.5f);
                     }
                     break;
                 default:

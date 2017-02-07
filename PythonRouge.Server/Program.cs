@@ -85,15 +85,14 @@ namespace PythonRouge.Server
             {
                 case 34:
                 {
-                    //Stream stream = new MemoryStream();
-                    //formatter.Serialize(stream, map.grid);
-                    //stream.Position = 0;
-                    //byte[] contents = stream.
-                    //stream.Close();
-                    //var outMsg = server.CreateMessage();
-                    //outMsg.Write(45);
-                    //outMsg.Write(contents);
-                    //server.SendMessage(outMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
+                    MemoryStream stream = new MemoryStream();
+                    formatter.serialize(map.grid, stream);
+                    var c = stream.ToArray();
+                    var b = ToHexString(c);
+                    var outMsg = server.CreateMessage();
+                    outMsg.Write(45);
+                    outMsg.Write(b);
+                    server.SendMessage(outMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
                     break;
                 }
             }
