@@ -19,29 +19,28 @@ using System.IO;
 
 namespace PythonRouge.Server
 {
-    class Program
+    public class Program
     {
         public static Map map = new Map(70, 50, null);
-        public static Dictionary<string, Player> players = new Dictionary<string, Player>();
-        public static IFormatter formatter = new BinaryFormatter();
-        public static NetPeer server;
+        public static Dictionary<string, Player> Players = new Dictionary<string, Player>();
+        public static IFormatter Formatter = new BinaryFormatter();
+        public static NetPeer Server;
 
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             map.generate();
             Console.WriteLine(("Enter Server name:"));
             var name = Console.ReadLine();
-            NetPeerConfiguration config = new NetPeerConfiguration("PythonRouge");
-            config.Port = 32078;
+            var config = new NetPeerConfiguration("PythonRouge") {Port = 32078};
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
-            server = new NetServer(config);
-            server.Start();
+            Server = new NetServer(config);
+            Server.Start();
             Console.WriteLine("Ready");
             NetIncomingMessage msg;
             while (true)
             {
-                while ((msg = server.ReadMessage()) != null)
+                while ((msg = Server.ReadMessage()) != null)
                 {
                     Console.WriteLine("Got Message");
                     switch (msg.MessageType)
@@ -62,18 +61,18 @@ namespace PythonRouge.Server
                             break;
                         case NetIncomingMessageType.DiscoveryRequest:
                             // Create a response and write some example data to it
-                            NetOutgoingMessage response = server.CreateMessage();
+                            NetOutgoingMessage response = Server.CreateMessage();
                             Console.WriteLine("Client request");
                             response.Write(name);
                             // Send the response to the sender of the request
-                            server.SendDiscoveryResponse(response, msg.SenderEndPoint);
+                            Server.SendDiscoveryResponse(response, msg.SenderEndPoint);
                             break;
                         default:
                             Console.WriteLine("Unhandled type: " + msg.MessageType);
                             break;
 
                     }
-                    server.Recycle(msg);
+                    Server.Recycle(msg);
                 }
             }
         }
@@ -85,14 +84,10 @@ namespace PythonRouge.Server
             {
                 case 34:
                 {
-                    MemoryStream stream = new MemoryStream();
-                    formatter.serialize(map.grid, stream);
-                    var c = stream.ToArray();
-                    var b = ToHexString(c);
-                    var outMsg = server.CreateMessage();
-                    outMsg.Write(45);
-                    outMsg.Write(b);
-                    server.SendMessage(outMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
+                    Console.WriteLine(map.grid.mapTostring());
+                    //outMsg.Write(45);
+                    //outMsg.Write(b);
+                    //Server.SendMessage(outMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
                     break;
                 }
             }

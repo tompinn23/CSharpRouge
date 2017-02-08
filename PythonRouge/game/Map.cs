@@ -160,6 +160,21 @@ namespace PythonRouge.game
         {
             Game_map[new Tuple<int, int>(x, y)].lit = true;
         }
+
+        public string mapTostring()
+        {
+            string[] temp = new string[game_map.Count];
+            int counter = 0;
+            foreach (KeyValuePair<Tuple<int, int>, Tile> kvp in Game_map)
+            {
+                string xy = kvp.Key.Item1.ToString() + "/" + kvp.Key.Item2.ToString();
+                string type = kvp.Value.ToString();
+                string part = xy + ":" + type;
+                temp[counter] = part;
+            }
+            return string.Join(",", temp);
+        }
+
     }
 
 

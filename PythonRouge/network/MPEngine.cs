@@ -125,11 +125,8 @@ namespace PythonRouge.network
             switch (code)
             {
                 case 45:
-
-                    Stream stream = new MemoryStream();
-                    //msg.ReadAllFields(grid);
+                    //var c = msg.ReadString();
                     //map = new Map(70, 50, grid);
-                    //mapReady = true;
                     break;
             }
         }
