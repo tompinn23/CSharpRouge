@@ -84,10 +84,12 @@ namespace PythonRouge.Server
             {
                 case 34:
                 {
-                    Console.WriteLine(map.grid.mapTostring());
-                    //outMsg.Write(45);
-                    //outMsg.Write(b);
-                    //Server.SendMessage(outMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
+                    var outMsg = Server.CreateMessage();
+                    string contents = map.grid.mapTostring();
+                    //Console.WriteLine(contents);
+                    outMsg.Write(45);
+                    outMsg.Write(contents);
+                    Server.SendMessage(outMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
                     break;
                 }
             }

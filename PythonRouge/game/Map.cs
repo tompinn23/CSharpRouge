@@ -9,11 +9,10 @@
 // 
 // You should have received a copy of the GNU General Public License along with this program. If not, see
 // http://www.gnu.org/licenses/.
-using System;
-using System.Linq;
-using System.Collections.Generic;
 using Karcero.Engine;
 using Karcero.Engine.Models;
+using System;
+using System.Collections.Generic;
 
 namespace PythonRouge.game
 {
@@ -50,9 +49,23 @@ namespace PythonRouge.game
 
         public bool canMove(EntityPos pos, int dx, int dy)
         {
-            if (grid.Game_map[new Tuple<int, int>(pos.x + dx, pos.y + dy)].type == TileType.Wall)
+            try
+            {
+                if (grid.Game_map[new Tuple<int, int>(pos.x + dx, pos.y + dy)].type == TileType.Wall)
+                {
+                    return false;
+
+                }
+                return true;
+            }
+#pragma warning disable 0168
+            catch (KeyNotFoundException e)
+#pragma warning restore 0168
+            {
                 return false;
-            return true;
+            }
+
+
         }
 
         public EntityPos findPPos()
@@ -168,12 +181,55 @@ namespace PythonRouge.game
             foreach (KeyValuePair<Tuple<int, int>, Tile> kvp in Game_map)
             {
                 string xy = kvp.Key.Item1.ToString() + "/" + kvp.Key.Item2.ToString();
-                string type = kvp.Value.ToString();
+                string type = null;
+                switch (kvp.Value.type)
+                {
+                        case TileType.Empty:
+                            type = "Empty";
+                            break;
+                        case TileType.Floor:
+                            type = "Floor";
+                            break;
+                        case TileType.Wall:
+                            type = "Wall";
+                            break;
+                }
                 string part = xy + ":" + type;
                 temp[counter] = part;
+                counter++;
             }
             return string.Join(",", temp);
         }
+
+        public void mapFromString(string map)
+        {
+            string[] firstsep = map.Split(new char[] {','});
+            foreach (string value in firstsep)
+            {
+                string[] secSep = value.Split(new char[] {':'});
+                string[] key = secSep[0].Split(new char[] {'/'});
+                var accKey = new Tuple<int, int>(int.Parse(key[0]), int.Parse(key[1]));
+                switch (secSep[1])
+                {
+                    case "Empty":
+                        game_map[accKey].type = TileType.Empty;
+                        game_map[accKey].block_sight = false;
+                        game_map[accKey].blocked = false;
+                        break;
+                    case "Floor":
+                        game_map[accKey].type = TileType.Floor;
+                        game_map[accKey].block_sight = false;
+                        game_map[accKey].blocked = false;
+                        break;
+                    case "Wall":
+                        game_map[accKey].type = TileType.Wall;
+                        game_map[accKey].block_sight = true;
+                        game_map[accKey].blocked = true;
+                        break;
+                }
+            }
+        }
+
 
     }
 

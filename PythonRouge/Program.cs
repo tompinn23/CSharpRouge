@@ -132,8 +132,8 @@ namespace PythonRouge
         private static void rootConsole_Render(object sender, UpdateEventArgs e)
         {
             _rootConsole.Clear();
-            if (_spEngine != null)
-                _spEngine.render();
+            _spEngine?.render();
+            _mpEngine?.Render();
             if (_spEngine == null && _mpEngine == null)
             {
                 if (main)

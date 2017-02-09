@@ -125,8 +125,11 @@ namespace PythonRouge.network
             switch (code)
             {
                 case 45:
-                    //var c = msg.ReadString();
-                    //map = new Map(70, 50, grid);
+                    var c = msg.ReadString();
+                    //Console.WriteLine(c);
+                    map = new Map(70, 50, null);
+                    map.grid.mapFromString(c);
+                    mapReady = true;
                     break;
             }
         }
@@ -164,7 +167,10 @@ namespace PythonRouge.network
 
         internal void PreRender()
         {
-            if(mapReady) RenderMap();
+            if (mapReady)
+            {
+                RenderMap();
+            }
 
             Player.draw(MapConsole);
         }
