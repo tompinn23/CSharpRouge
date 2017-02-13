@@ -11,6 +11,7 @@
 // http://www.gnu.org/licenses/.
 
 using System;
+using System.Collections;
 using System.Linq;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -19,6 +20,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Lidgren.Network;
 using PythonRouge.game;
 using RLNET;
+using System.Collections.Generic;
 
 namespace PythonRouge.network
 {
@@ -30,7 +32,9 @@ namespace PythonRouge.network
 
         internal RLConsole MapConsole = new RLConsole(70, 50);
 
-        internal Player Player = new Player(0, 0, 100, '@', "Tom");
+        
+        internal Dictionary<string, Player> Players = new Dictionary<string, Player>();
+        internal string LocalName;
 
         internal RLRootConsole RootConsole;
 
@@ -38,15 +42,9 @@ namespace PythonRouge.network
         internal bool InitFin = false;
         internal bool mapReady = false;
 
-        public static byte[] StringToByteArray(string hex) 
+        internal MpEngine(RLRootConsole rootConsole, string name)
         {
-            return Enumerable.Range(0, hex.Length)
-                     .Where(x => x % 2 == 0)
-                     .Select(x => Convert.ToByte(hex.Substring(x, 2), 16))
-                     .ToArray();
-        }
-        internal MpEngine(RLRootConsole rootConsole)
-        {
+            this.LocalName = name;
             var config = new NetPeerConfiguration("PythonRouge");
             config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
             Client = new NetClient(config);
@@ -59,9 +57,13 @@ namespace PythonRouge.network
             InvConsole.SetBackColor(0, 0, 20, 70, RLColor.Cyan);
             //var pos = Map.findPPos();
             //Player.pos = pos;
+            this.LocalName = name;
+            Players[LocalName] = new Player(0, 0, 100, '@', name);
+            playerConnected();
             InitFin = true;
         }
 
+        
         internal void Render()
         {
             PreRender();
@@ -84,8 +86,28 @@ namespace PythonRouge.network
         {
             Console.WriteLine("Requesting Map");
             var msg = Client.CreateMessage();
-            msg.Write(34);
+            msg.Write(1);
             Client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
+        }
+
+        internal void updatePlayer()
+        {
+            var msg = Client.CreateMessage();
+            msg.Write(2);
+            msg.Write(LocalName);
+            msg.Write(Players[LocalName].pos.x);
+            msg.Write(Players[LocalName].pos.y);
+            Client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
+        }
+
+        internal void playerConnected()
+        {
+            var msg = Client.CreateMessage();
+            msg.Write(3);
+            msg.Write(LocalName);
+            msg.Write(Players[LocalName].pos.x);
+            msg.Write(Players[LocalName].pos.y);
+
         }
 
         internal void MsgReader()
@@ -124,12 +146,19 @@ namespace PythonRouge.network
             var code = msg.ReadInt32();
             switch (code)
             {
-                case 45:
+                case 1:
                     var c = msg.ReadString();
                     //Console.WriteLine(c);
                     map = new Map(70, 50, null);
                     map.grid.mapFromString(c);
                     mapReady = true;
+                    break;
+                case 2:
+                    var name = msg.ReadString();
+                    var x = msg.ReadInt32();
+                    var y = msg.ReadInt32();
+                    var newPos = new EntityPos(x, y);
+                    Players[name].pos = newPos;
                     break;
             }
         }
@@ -171,13 +200,18 @@ namespace PythonRouge.network
             {
                 RenderMap();
             }
-
-            Player.draw(MapConsole);
+            foreach (var p in Players.Values)
+            {
+                p.draw(MapConsole);
+            }
         }
 
         internal void PostRender()
         {
-            Player.clear(MapConsole);
+            foreach (var p in Players.Values)
+            {
+                p.clear(MapConsole);
+            }
         }
 
 
@@ -187,38 +221,42 @@ namespace PythonRouge.network
             {
                 case RLKey.Up:
                     {
-                        if (!map.canMove(Player.pos, 0, -1)) return;
+                        if (!map.canMove(Players[LocalName].pos, 0, -1)) return;
                         map.resetLight();
-                        Player.move(0, -1);
-                        var pos = new Vector2(Player.pos.x, Player.pos.y);
+                        Players[LocalName].move(0, -1);
+                        var pos = new Vector2(Players[LocalName].pos.x, Players[LocalName].pos.y);
                         ShadowCast.ComputeVisibility(map.grid, pos, 7.5f);
+                        updatePlayer();
                     }
                     break;
                 case RLKey.Down:
                     {
-                        if (!map.canMove(Player.pos, 0, 1)) return;
+                        if (!map.canMove(Players[LocalName].pos, 0, 1)) return;
                         map.resetLight();
-                        Player.move(0, 1);
-                        var pos = new Vector2(Player.pos.x, Player.pos.y);
+                        Players[LocalName].move(0, 1);
+                        var pos = new Vector2(Players[LocalName].pos.x, Players[LocalName].pos.y);
                         ShadowCast.ComputeVisibility(map.grid, pos, 7.5f);
+                        updatePlayer();
                     }
                     break;
                 case RLKey.Left:
                     {
-                        if (!map.canMove(Player.pos, -1, 0)) return;
+                        if (!map.canMove(Players[LocalName].pos, -1, 0)) return;
                         map.resetLight();
-                        Player.move(-1, 0);
-                        var pos = new Vector2(Player.pos.x, Player.pos.y);
+                        Players[LocalName].move(-1, 0);
+                        var pos = new Vector2(Players[LocalName].pos.x, Players[LocalName].pos.y);
                         ShadowCast.ComputeVisibility(map.grid, pos, 7.5f);
+                        updatePlayer();
                     }
                     break;
                 case RLKey.Right:
                     {
-                        if (!map.canMove(Player.pos, 1, 0)) return;
+                        if (!map.canMove(Players[LocalName].pos, 1, 0)) return;
                         map.resetLight();
-                        Player.move(1, 0);
-                        var pos = new Vector2(Player.pos.x, Player.pos.y);
+                        Players[LocalName].move(1, 0);
+                        var pos = new Vector2(Players[LocalName].pos.x, Players[LocalName].pos.y);
                         ShadowCast.ComputeVisibility(map.grid, pos, 7.5f);
+                        updatePlayer();
                     }
                     break;
                 default:

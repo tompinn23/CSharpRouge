@@ -13,9 +13,7 @@ using System;
 using Lidgren.Network;
 using PythonRouge.game;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.IO;
+using System.Net;
 
 namespace PythonRouge.Server
 {
@@ -23,7 +21,6 @@ namespace PythonRouge.Server
     {
         public static Map map = new Map(70, 50, null);
         public static Dictionary<string, Player> Players = new Dictionary<string, Player>();
-        public static IFormatter Formatter = new BinaryFormatter();
         public static NetPeer Server;
 
 
@@ -77,21 +74,55 @@ namespace PythonRouge.Server
             }
         }
 
+        private static void SendAll(NetOutgoingMessage msg)
+        {
+            foreach (NetConnection client in Server.Connections)
+            {
+                Server.SendMessage(msg, client, NetDeliveryMethod.ReliableOrdered);
+            }
+        }
+
         private static void msgHandler(NetIncomingMessage msg)
         {
             var code = msg.ReadInt32();
             switch (code)
             {
-                case 34:
+                case 1:
                 {
                     var outMsg = Server.CreateMessage();
                     string contents = map.grid.mapTostring();
                     //Console.WriteLine(contents);
-                    outMsg.Write(45);
+                    outMsg.Write(1);
                     outMsg.Write(contents);
                     Server.SendMessage(outMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
                     break;
                 }
+                case 2:
+                {
+                    var name = msg.ReadString();
+                    var x = msg.ReadInt32();
+                    var y = msg.ReadInt32();
+                    var newPos = new EntityPos(x, y);
+                    Players[name].pos = newPos;
+                    var outMsg = Server.CreateMessage();
+                    outMsg.Write(2);
+                    outMsg.Write(name);
+                    outMsg.Write(x);
+                    outMsg.Write(y);
+                    SendAll(outMsg);
+                    break;
+                }
+                case 3:
+                {
+                    var name = msg.ReadString();
+                    var x = msg.ReadInt32();
+                    var y = msg.ReadInt32();
+                    Players[name] = new Player(x, y, 100, '@', name);
+                    break;
+                }
+
+                default:
+                    break;
             }
 
         }
