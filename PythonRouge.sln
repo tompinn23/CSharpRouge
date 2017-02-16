@@ -1,11 +1,15 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26127.3
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PythonRouge", "PythonRouge\PythonRouge.csproj", "{51DABCC5-1E8C-4209-A56C-60E6BC9D10E0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PythonRouge.Server", "PythonRouge.Server\PythonRouge.Server.csproj", "{258759C5-FFAB-43B0-9B27-49EDBCABB954}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PythonRouge.game", "PythonRouge.game\PythonRouge.game.csproj", "{53141067-E1EE-4834-90E8-EDE1334F18E1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PythonRouge.Network", "PythonRouge.Network\PythonRouge.Network.csproj", "{22D6444E-AF12-49CC-85AD-DA3EF7A2A2D6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +25,14 @@ Global
 		{258759C5-FFAB-43B0-9B27-49EDBCABB954}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{258759C5-FFAB-43B0-9B27-49EDBCABB954}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{258759C5-FFAB-43B0-9B27-49EDBCABB954}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53141067-E1EE-4834-90E8-EDE1334F18E1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53141067-E1EE-4834-90E8-EDE1334F18E1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53141067-E1EE-4834-90E8-EDE1334F18E1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53141067-E1EE-4834-90E8-EDE1334F18E1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22D6444E-AF12-49CC-85AD-DA3EF7A2A2D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22D6444E-AF12-49CC-85AD-DA3EF7A2A2D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22D6444E-AF12-49CC-85AD-DA3EF7A2A2D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22D6444E-AF12-49CC-85AD-DA3EF7A2A2D6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

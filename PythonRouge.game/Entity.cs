@@ -28,7 +28,7 @@ namespace PythonRouge.game
         }
     }
 
-    internal class Entity
+    public class Entity
     {
         public char character;
         public string entityType;

@@ -76,10 +76,7 @@ namespace PythonRouge.Server
 
         private static void SendAll(NetOutgoingMessage msg)
         {
-            foreach (NetConnection client in Server.Connections)
-            {
-                Server.SendMessage(msg, client, NetDeliveryMethod.ReliableOrdered);
-            }
+            Server.SendMessage(msg, Server.Connections, NetDeliveryMethod.ReliableOrdered, 0);
         }
 
         private static void msgHandler(NetIncomingMessage msg)

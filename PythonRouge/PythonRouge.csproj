@@ -39,40 +39,34 @@
     <StartupObject>PythonRouge.Program</StartupObject>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Karcero">
-      <HintPath>.\Karcero.dll</HintPath>
-    </Reference>
-    <Reference Include="Lidgren.Network">
-      <HintPath>.\Lidgren.Network.dll</HintPath>
-    </Reference>
     <Reference Include="OpenTK">
       <HintPath>.\OpenTK.dll</HintPath>
     </Reference>
     <Reference Include="RLNET">
       <HintPath>.\RLNET.dll</HintPath>
     </Reference>
-    <Reference Include="RogueSharp">
-      <HintPath>.\RogueSharp.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="game\Colours.cs" />
-    <Compile Include="game\Entity.cs" />
-    <Compile Include="game\FOV.cs" />
-    <Compile Include="game\Map.cs" />
-    <Compile Include="game\Player.cs" />
-    <Compile Include="game\SPEngine.cs" />
-    <Compile Include="network\MPEngine.cs" />
+    <Compile Include="Menu.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\PythonRouge.game\PythonRouge.game.csproj">
+      <Project>{53141067-e1ee-4834-90e8-ede1334f18e1}</Project>
+      <Name>PythonRouge.game</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\PythonRouge.Network\PythonRouge.Network.csproj">
+      <Project>{22d6444e-af12-49cc-85ad-da3ef7a2a2d6}</Project>
+      <Name>PythonRouge.Network</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
