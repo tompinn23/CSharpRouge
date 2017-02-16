@@ -29,6 +29,7 @@ namespace PythonRouge
         private static bool detsEntered = false;
         private static bool wantName;
         private static string name = "";
+        private static MPLobby _lobby;
 
         /// <summary>
         ///     Main entry point for the program
@@ -98,7 +99,7 @@ namespace PythonRouge
                 switch(Menu.enterDetsUpdate(_rootConsole))
                 {
                     case 1:
-                        _mpEngine = new MpEngine(_rootConsole, Menu.name);
+                        _lobby = new MPLobby(_rootConsole, Menu.name);
                         Menu.currMenu = "game";
                         break;
                     case 0:
@@ -112,6 +113,12 @@ namespace PythonRouge
                 {
                     _spEngine?.handleKey(keypress);
                     _mpEngine?.HandleKey(keypress);
+                }
+                var m = _lobby?.Update(keypress);
+                if(m == 1)
+                {
+                    _mpEngine = new MpEngine(_rootConsole, Menu.name, _lobby?.servers[_lobby.sellist[_lobby.curIndex]]);
+                    _lobby = null;
                 }
                 _mpEngine?.Update();
             }
@@ -141,6 +148,7 @@ namespace PythonRouge
                 case "game":
                     _spEngine?.render();
                     _mpEngine?.Render();
+                    _lobby?.Render();
                     break;
 
 

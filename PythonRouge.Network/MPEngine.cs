@@ -21,6 +21,7 @@ using Lidgren.Network;
 using PythonRouge.game;
 using RLNET;
 using System.Collections.Generic;
+using System.Net;
 
 namespace PythonRouge.Network
 {
@@ -44,7 +45,7 @@ namespace PythonRouge.Network
         public bool InitFin = false;
         public bool mapReady = false;
 
-        public MpEngine(RLRootConsole rootConsole, string name)
+        public MpEngine(RLRootConsole rootConsole, string name, IPEndPoint endpoint)
         {
             this.LocalName = name;
             var config = new NetPeerConfiguration("PythonRouge");
@@ -52,7 +53,7 @@ namespace PythonRouge.Network
             Client = new NetClient(config);
             Client.Start();
             Console.WriteLine("Discovering local peers");
-            Client.Connect("127.0.0.1", 32078);
+            Client.Connect(endpoint);
             //Client.DiscoverLocalPeers(32078);
             this.RootConsole = rootConsole;
             MapConsole.SetBackColor(0, 0, 70, 50, RLColor.Blue);
