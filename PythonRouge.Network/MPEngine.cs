@@ -21,28 +21,31 @@ using Lidgren.Network;
 using PythonRouge.game;
 using RLNET;
 using System.Collections.Generic;
+using System.Net;
 
-namespace PythonRouge.network
+namespace PythonRouge.Network
 {
-    internal class MpEngine
+    public class MpEngine
     {
-        internal NetClient Client;
-        internal RLConsole InvConsole = new RLConsole(20, 70);
-        internal Map map;
+        public NetClient Client;
+        public bool isConnected;
 
-        internal RLConsole MapConsole = new RLConsole(70, 50);
+        public RLConsole InvConsole = new RLConsole(20, 70);
+        public Map map;
+
+        public RLConsole MapConsole = new RLConsole(70, 50);
 
         
-        internal Dictionary<string, Player> Players = new Dictionary<string, Player>();
-        internal string LocalName;
+        public Dictionary<string, Player> Players = new Dictionary<string, Player>();
+        public string LocalName;
 
-        internal RLRootConsole RootConsole;
+        public RLRootConsole RootConsole;
 
-        internal bool WantMap = true;
-        internal bool InitFin = false;
-        internal bool mapReady = false;
+        public bool WantMap = true;
+        public bool InitFin = false;
+        public bool mapReady = false;
 
-        internal MpEngine(RLRootConsole rootConsole, string name)
+        public MpEngine(RLRootConsole rootConsole, string name, IPEndPoint endpoint)
         {
             this.LocalName = name;
             var config = new NetPeerConfiguration("PythonRouge");
@@ -50,7 +53,7 @@ namespace PythonRouge.network
             Client = new NetClient(config);
             Client.Start();
             Console.WriteLine("Discovering local peers");
-            Client.Connect("127.0.0.1", 32078);
+            Client.Connect(endpoint);
             //Client.DiscoverLocalPeers(32078);
             this.RootConsole = rootConsole;
             MapConsole.SetBackColor(0, 0, 70, 50, RLColor.Blue);
@@ -58,13 +61,19 @@ namespace PythonRouge.network
             //var pos = Map.findPPos();
             //Player.pos = pos;
             this.LocalName = name;
-            Players[LocalName] = new Player(0, 0, 100, '@', name);
+        }
+
+        public void FinishInit()
+        {
+            
+            Players[LocalName] = new Player(0, 0, 100, '@', LocalName);
+            Console.WriteLine("Sending Player info");
             playerConnected();
             InitFin = true;
         }
 
         
-        internal void Render()
+        public void Render()
         {
             PreRender();
             RLConsole.Blit(MapConsole, 0, 0, 70, 50, RootConsole, 0, 10);
@@ -72,17 +81,18 @@ namespace PythonRouge.network
             PostRender();
         }
 
-        internal void Update()
+        public void Update()
         {
+            if(!InitFin && isConnected) FinishInit();
             MsgReader();
-            if (WantMap && InitFin && Client.ConnectionStatus == NetConnectionStatus.Connected)
+            if (WantMap && InitFin && isConnected)
             {
                 WantMap = false;
                 RequestMap();
             }
         }
 
-        internal void RequestMap()
+        public void RequestMap()
         {
             Console.WriteLine("Requesting Map");
             var msg = Client.CreateMessage();
@@ -90,7 +100,7 @@ namespace PythonRouge.network
             Client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
         }
 
-        internal void updatePlayer()
+        public void updatePlayer()
         {
             var msg = Client.CreateMessage();
             msg.Write(2);
@@ -100,17 +110,18 @@ namespace PythonRouge.network
             Client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
         }
 
-        internal void playerConnected()
+        public void playerConnected()
         {
             var msg = Client.CreateMessage();
             msg.Write(3);
             msg.Write(LocalName);
             msg.Write(Players[LocalName].pos.x);
             msg.Write(Players[LocalName].pos.y);
+            Client.SendMessage(msg, NetDeliveryMethod.ReliableOrdered);
 
         }
 
-        internal void MsgReader()
+        public void MsgReader()
         {
             NetIncomingMessage msg;
             while ((msg = Client.ReadMessage()) != null)
@@ -121,6 +132,14 @@ namespace PythonRouge.network
                         NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
                         string reason = msg.ReadString();
                         Console.WriteLine(status + " " + reason);
+                        if(status == NetConnectionStatus.Connected)
+                        {
+                            isConnected = true;
+                        }
+                        if(status == NetConnectionStatus.Disconnected)
+                        {
+                            isConnected = false;
+                        }
                         break;
                     case NetIncomingMessageType.ConnectionApproval:
                         Console.WriteLine(msg.ReadString());
@@ -141,7 +160,7 @@ namespace PythonRouge.network
             }
         }
 
-        internal void MsgHandler(NetIncomingMessage msg)
+        public void MsgHandler(NetIncomingMessage msg)
         {
             var code = msg.ReadInt32();
             switch (code)
@@ -151,6 +170,7 @@ namespace PythonRouge.network
                     //Console.WriteLine(c);
                     map = new Map(70, 50, null);
                     map.grid.mapFromString(c);
+                    Players[LocalName].pos = map.findPPos();
                     mapReady = true;
                     break;
                 case 2:
@@ -158,12 +178,16 @@ namespace PythonRouge.network
                     var x = msg.ReadInt32();
                     var y = msg.ReadInt32();
                     var newPos = new EntityPos(x, y);
-                    Players[name].pos = newPos;
+                    if(Players.ContainsKey(name)) Players[name].pos = newPos;
+                    else
+                    {
+                        Players[name] = new Player(x, y, 100, '@', name);
+                    }
                     break;
             }
         }
 
-        internal void RenderMap()
+        public void RenderMap()
         {
             var game_map = map.grid.Game_map;
             foreach (var kvp in game_map)
@@ -194,7 +218,7 @@ namespace PythonRouge.network
         }
 
 
-        internal void PreRender()
+        public void PreRender()
         {
             if (mapReady)
             {
@@ -206,7 +230,7 @@ namespace PythonRouge.network
             }
         }
 
-        internal void PostRender()
+        public void PostRender()
         {
             foreach (var p in Players.Values)
             {
@@ -215,7 +239,7 @@ namespace PythonRouge.network
         }
 
 
-        internal void HandleKey(RLKeyPress keyPress)
+        public void HandleKey(RLKeyPress keyPress)
         {
             switch (keyPress.Key)
             {

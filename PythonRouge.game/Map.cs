@@ -162,7 +162,7 @@ namespace PythonRouge.game
             yDim = h;
         }
 
-        internal Dictionary<Tuple<int, int>, Tile> Game_map { get { return game_map; } set { game_map  = value; } }
+        public Dictionary<Tuple<int, int>, Tile> Game_map { get { return game_map; } set { game_map  = value; } }
 
         public bool IsWall(int x, int y)
         {
@@ -258,7 +258,7 @@ namespace PythonRouge.game
         }
     }
     [Serializable]
-    internal class Tile
+    public class Tile
     {
         public char symbol = ' ';
 
@@ -313,7 +313,7 @@ namespace PythonRouge.game
         }
     }
 
-    internal enum TileType
+    public enum TileType
     {
         Floor,
         Wall,

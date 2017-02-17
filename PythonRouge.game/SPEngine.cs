@@ -13,7 +13,7 @@ using RLNET;
 
 namespace PythonRouge.game
 {
-    internal class SPEngine
+    public class SPEngine
     {
         private readonly RLConsole invConsole = new RLConsole(20, 70);
         private readonly Map map = new Map(70, 50);
@@ -35,10 +35,10 @@ namespace PythonRouge.game
 
         public void render()
         {
-            PreUpdate();
+            PreRender();
             RLConsole.Blit(mapConsole, 0, 0, 70, 50, rootConsole, 0, 10);
             RLConsole.Blit(invConsole, 0, 0, 20, 70, rootConsole, 70, 0);
-            PostUpdate();
+            PostRender();
         }
 
         public void mapGenerate()
@@ -75,13 +75,13 @@ namespace PythonRouge.game
         }
 
 
-        public void PreUpdate()
+        public void PreRender()
         {
             renderMap();
             player.draw(mapConsole);
         }
 
-        public void PostUpdate()
+        public void PostRender()
         {
             player.clear(mapConsole);
         }
